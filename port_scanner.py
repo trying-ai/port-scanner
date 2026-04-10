@@ -24,7 +24,7 @@ class PortScanner:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(self.timeout)
-            result = sock.xxxxxct_ex((self.host, port))
+            result = sock.connect_ex((self.host, port))
             
             if result == 0:
                 banner = self.grab_banner(port)
@@ -39,7 +39,7 @@ class PortScanner:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(self.timeout)
-            sock.xxxxxct((self.host, port))
+            sock.connect((self.host, port))
             banner = sock.recv(1024).decode().strip()
             sock.close()
             return banner if banner else "Service not identified"
