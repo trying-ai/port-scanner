@@ -1,73 +1,48 @@
 # Port Scanner
 
-A multithreaded TCP port scanner built from scratch. Supports custom port ranges, timeout control, and service banner grabbing. Designed to understand how tools like Nmap work under the hood.
+A multithreaded TCP port scanner built from scratch in Python. Designed to understand how tools like Nmap work under the hood.
+
+## Features
+
+- Multithreaded scanning for speed
+- Custom port ranges
+- Service banner grabbing
+- Configurable timeout and thread count
+- Scan common ports option
 
 ## Installation
 
-1. Make sure you have Python 3 installed
-2. Install the dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Make the file executable (Linux):
-   ```
-   chmod +x port_scanner.py
-   ```
+Clone the repository and ensure Python 3.x is installed.
 
 ## Usage
 
-Basic scan of default port range (1-1000):
+```bash
+python port_scanner.py <host> [options]
 ```
+
+### Examples
+
+```bash
+# Scan ports 1-1000 on example.com
 python port_scanner.py example.com
-```
 
-Scan specific port range:
-```
-python port_scanner.py example.com --port-range 1 65535
-```
+# Scan specific range
+python port_scanner.py example.com --port-range 80 443
 
-Scan with custom thread count and timeout:
-```
-python port_scanner.py example.com --port-range 1 10000 --threads 100 --timeout 3
-```
-
-Scan only common ports:
-```
+# Scan common ports only
 python port_scanner.py example.com --common-ports
+
+# Increase threads for faster scanning
+python port_scanner.py example.com --threads 100
 ```
 
 ## Options
 
-- `host`: Target host to scan
 - `--port-range START END`: Port range to scan (default: 1-1000)
-- `--threads N`: Number of worker threads (default: 50)
-- `--timeout SECONDS`: Socket timeout in seconds (default: 2)
+- `--threads N`: Number of threads (default: 50)
+- `--timeout T`: Socket timeout in seconds (default: 2)
 - `--common-ports`: Scan only common ports (21, 22, 80, 443, 3306, 5432, 8080, 8000, 9000)
 
-## Example Output
+## License
 
-```
-Starting scan on example.com from port 1 to 100
-Threads: 50, Timeout: 2s
-------------------------------------------------------------
-Open ports found: 2
-Port 80: HTTP/1.1 200 OK
-Port 443: Service not identified
-------------------------------------------------------------
-Scan completed in 4.32 seconds
-```
-
-## How it Works
-
-1. Creates a thread pool based on the specified thread count
-2. Distributes ports across threads using a queue
-3. Each thread attempts to establish a TCP connection to each port
-4. For open ports, attempts to grab the service banner
-5. Results are collected and displayed with timing information
-
-## Notes
-
-- Requires appropriate permissions to scan hosts
-- Use responsibly and only scan hosts you own or have permission to scan
-- Timeout value affects scan speed (lower values = faster but may miss slow services)
-- Thread count affects system resource usage (higher values = faster but more resource intensive)
+MIT
