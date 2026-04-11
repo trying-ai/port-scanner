@@ -22,28 +22,29 @@ class PortScanner:
 
     def scan_port(self, port):
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(self.timeout)
-            result = sock.connect_ex((self.host, port))
-            
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(self.timeout)
+                result = sock.connect_ex((self.host, port))
+
             if result == 0:
                 banner = self.grab_banner(port)
                 with self.lock:
                     self.open_ports.append((port, banner))
-            
-            sock.close()
         except socket.error:
             pass
 
     def grab_banner(self, port):
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(self.timeout)
-            sock.connect((self.host, port))
-            banner = sock.recv(1024).decode().strip()
-            sock.close()
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(self.timeout)
+                sock.connect((self.host, port))
+                try:
+                    sock.sendall(b"\r\n")
+                except OSError:
+                    pass
+                banner = sock.recv(1024).decode(errors="ignore").strip()
             return banner if banner else "Service not identified"
-        except:
+        except OSError:
             return "Service not identified"
 
     def worker(self):
@@ -116,20 +117,63 @@ Examples:
 
     args = parser.parse_args()
 
+    if args.timeout <= 0:
+        print("Timeout must be greater than 0")
+        sys.exit(1)
+
+    if args.threads < 1:
+        print("Threads must be at least 1")
+        sys.exit(1)
+
+    try:
+        resolved_host = socket.gethostbyname(args.host)
+    except socket.gaierror:
+        print(f"Failed to resolve host: {args.host}")
+        sys.exit(1)
+
+    print(f"Resolved {args.host} -> {resolved_host}")
+
     if args.common_ports:
-        ports = [21, 22, 80, 443, 3306, 5432, 8080, 8000, 9000]
-        for port in ports:
-            args.port_range = [port, port]
-            scanner = PortScanner(args.host, args.threads, args.timeout)
-            scanner.scan_range(port, port)
+        common_ports = [21, 22, 80, 443, 3306, 5432, 8000, 8080, 9000]
+        scanner = PortScanner(resolved_host, args.threads, args.timeout)
+        for port in common_ports:
+            scanner.queue.put(port)
+
+        print(f"Starting scan on {args.host} ({resolved_host}) for common ports")
+        print(f"Threads: {args.threads}, Timeout: {args.timeout}s")
+        print("-" * 60)
+
+        start_time = datetime.now()
+        threads = []
+        for _ in range(args.threads):
+            t = threading.Thread(target=scanner.worker)
+            t.start()
+            threads.append(t)
+
+        scanner.queue.join()
+
+        for _ in range(args.threads):
+            scanner.queue.put(None)
+        for thread in threads:
+            thread.join()
+
+        duration = datetime.now() - start_time
+        scanner.print_results(duration)
     else:
         start_port, end_port = args.port_range
         if start_port > end_port:
             print("Start port must be less than or equal to end port")
             sys.exit(1)
+        if start_port < 1 or end_port > 65535:
+            print("Port range must be between 1 and 65535")
+            sys.exit(1)
 
-        scanner = PortScanner(args.host, args.threads, args.timeout)
-        scanner.scan_range(start_port, end_port)
+        scanner = PortScanner(resolved_host, args.threads, args.timeout)
+        try:
+            scanner.scan_range(start_port, end_port)
+        except KeyboardInterrupt:
+            print("\nScan interrupted by user")
+            sys.exit(130)
 
 if __name__ == '__main__':
     main()

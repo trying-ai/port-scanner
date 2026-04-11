@@ -1,48 +1,48 @@
-# Port Scanner
+# Port Scanner (Python)
 
-A multithreaded TCP port scanner built from scratch in Python. Designed to understand how tools like Nmap work under the hood.
+Multithreaded TCP port scanner with optional banner grabbing.
 
 ## Features
 
-- Multithreaded scanning for speed
-- Custom port ranges
-- Service banner grabbing
-- Configurable timeout and thread count
-- Scan common ports option
+- Hostname resolution with clear startup output
+- Configurable thread count and socket timeout
+- Port range scanning (`1-65535`) and common-port mode
+- Basic service banner attempt on open ports
 
-## Installation
+## Requirements
 
-Clone the repository and ensure Python 3.x is installed.
+- Python 3.8+
+- No external Python dependencies
 
 ## Usage
 
 ```bash
-python port_scanner.py <host> [options]
+python port_scanner.py <host>
 ```
 
-### Examples
+Examples:
 
 ```bash
-# Scan ports 1-1000 on example.com
 python port_scanner.py example.com
-
-# Scan specific range
-python port_scanner.py example.com --port-range 80 443
-
-# Scan common ports only
+python port_scanner.py example.com --port-range 1 2000
+python port_scanner.py example.com --threads 100 --timeout 1.5
 python port_scanner.py example.com --common-ports
-
-# Increase threads for faster scanning
-python port_scanner.py example.com --threads 100
 ```
 
-## Options
+## CLI Options
 
-- `--port-range START END`: Port range to scan (default: 1-1000)
-- `--threads N`: Number of threads (default: 50)
-- `--timeout T`: Socket timeout in seconds (default: 2)
-- `--common-ports`: Scan only common ports (21, 22, 80, 443, 3306, 5432, 8080, 8000, 9000)
+- `host` target host or IP
+- `--port-range START END` port range (default: `1 1000`)
+- `--threads` worker threads (default: `50`)
+- `--timeout` socket timeout in seconds (default: `2`)
+- `--common-ports` scan a small predefined common list
+
+## Notes
+
+- Use only with explicit authorization.
+- Lower timeout = faster scans but may miss slow services.
+- Very high thread counts can overload your machine or network.
 
 ## License
 
-MIT
+MIT (see `LICENSE`).
