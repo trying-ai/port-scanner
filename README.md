@@ -1,48 +1,55 @@
-# Port Scanner (Python)
+# Port Scanner
 
-Multithreaded TCP port scanner with optional banner grabbing.
+A small multithreaded TCP scanner for quick host checks.
 
-## Features
-
-- Hostname resolution with clear startup output
-- Configurable thread count and socket timeout
-- Port range scanning (`1-65535`) and common-port mode
-- Basic service banner attempt on open ports
+It resolves the target, scans a port range, and tries to grab a simple banner on open ports.
 
 ## Requirements
 
 - Python 3.8+
-- No external Python dependencies
+- No external packages
 
-## Usage
-
-```bash
-python port_scanner.py <host>
-```
-
-Examples:
+## Quick start
 
 ```bash
 python port_scanner.py example.com
+```
+
+## Common commands
+
+```bash
 python port_scanner.py example.com --port-range 1 2000
 python port_scanner.py example.com --threads 100 --timeout 1.5
 python port_scanner.py example.com --common-ports
 ```
 
-## CLI Options
+## CLI options
 
 - `host` target host or IP
-- `--port-range START END` port range (default: `1 1000`)
-- `--threads` worker threads (default: `50`)
+- `--port-range START END` (default: `1 1000`)
+- `--threads` worker count (default: `50`)
 - `--timeout` socket timeout in seconds (default: `2`)
-- `--common-ports` scan a small predefined common list
+- `--common-ports` scan a short predefined list
 
-## Notes
+## Example output
 
-- Use only with explicit authorization.
-- Lower timeout = faster scans but may miss slow services.
-- Very high thread counts can overload your machine or network.
+```text
+Resolved example.com -> 93.184.216.34
+Starting scan on 93.184.216.34 from port 80 to 81
+Open ports found: 1
+Port 80: Service not identified
+```
+
+## Common issues
+
+- **Name resolution failed**: check DNS/network access.
+- **No open ports found**: target may filter traffic, or timeout is too low.
+- **Slow scan**: reduce range, lower threads, or tune timeout.
+
+## Responsible use
+
+Use only on systems you own or are explicitly authorized to test.
 
 ## License
 
-MIT (see `LICENSE`).
+MIT.
